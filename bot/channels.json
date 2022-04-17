@@ -1,4 +1,7 @@
 {
+    "event_setting_channel": {
+        "id": ""
+    },
     "event_notification_channel": {
         "id": ""
     }

@@ -1,6 +1,6 @@
 {
     "commands": [
-        {"name": "event", "description": "initialise guild event"},
-        {"name": "set", "description": "use it on the channel you want to set the events into"}
+        {"name": "event", "description": "setup a game event"},
+        {"name": "set", "description": "use it on the channel you want to send the game events embeds into"}
     ]
 }

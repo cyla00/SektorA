@@ -86,6 +86,11 @@ var error_embed = {
   title: 'the date-time format or price format was not correct, please relaunch using ```/launch```',
 }
 
+var general_error_embed = {
+  color: embed_color,
+  title: 'an error occured, please retry or check ```/howto``` for more information.',
+}
+
 // COMMANDS EVENTS
 client.on('interactionCreate', async interaction => {
 
@@ -95,8 +100,6 @@ client.on('interactionCreate', async interaction => {
 
     // LAUNCH AN EVENT COMMAND
     if (interaction.commandName === 'event') {
-
-      console.log(event_notification_channel.id)
 
       interaction.reply('please fill out the forms by replying to generate the event')
 
@@ -165,13 +168,14 @@ client.on('interactionCreate', async interaction => {
             {name: 'date', value: `${formatted_date}`},
           ]
         }
-
+        interaction.channel.send('this is a preview')
         interaction.channel.send({embeds: [event_embed]}).then(async event => {
+          
           var confirm = '✅'
           var deny = '❌'
           await event.react(confirm)
           await event.react(deny)
-          await event.channel.send(`to confirm the event select ${confirm}, to destroy it, select ${deny} and restart`)
+          await event.channel.send(`to confirm the event ${confirm}, to destroy it ${deny}`)
 
           const confirm_filter = (reaction, user) => {
             return user.id === message.author.id
@@ -180,12 +184,39 @@ client.on('interactionCreate', async interaction => {
           event.awaitReactions({confirm_filter, max: 1})
             .then((collected) => {
               if (collected.first().emoji.name == confirm) {
-                interaction.channel.send('confirm')
+                if (event_notification_channel.id == "") {
+                  var error_embed = {
+                    color: embed_color,
+                    title: 'please choose a channel to send the embed to, using the ```/set``` command.\nfor more info check ```/howto```',
+                    footer: {
+                      text: 'this message will autodestruct in 20 seconds'
+                    }
+                  }
+                  interaction.channel.send({embeds: [error_embed]}).then(() => {
+                    setTimeout(() => {
+                      return interaction.channel.bulkDelete(14)
+                    },3000)
+                  }).catch(err => {
+                    console.error(err)
+                    return interaction.channel.send({embeds: [general_error_embed]})
+                  })
+                }
+                else{
+                  client.channels.cache.get(event_notification_channel.id).send({embeds: [event_embed]}).then(async event => {
+                    await event.react('🃏')
+                  }).catch(err => {
+                    console.error(err)
+                    return interaction.channel.send({embeds: [general_error_embed]})
+                  })
+                }
               }
               else if (collected.first().emoji.name == deny) {
-                interaction.channel.send('deny')
+                return interaction.channel.bulkDelete(13)
               }
             })
+        }).catch(err => {
+          console.error(err)
+          return interaction.channel.send({embeds: [general_error_embed]})
         })
       })
 
@@ -203,10 +234,9 @@ client.on('interactionCreate', async interaction => {
 
     var embed = {
       color: embed_color,
-      title: 'this channel will now be used to send game events notifications\nreuse ```/set``` to change in any other channel',
+      title: 'this channel will now be used to send game events notifications.\nreuse ```/set``` to change in any other channel',
     }
     interaction.reply({embeds: [embed]})
-    console.log(event_notification_channel.id)
   }
 })
 
