@@ -78,22 +78,22 @@ var datetime_embed = {
 
 var exit_embed = {
   color: embed_color,
-  title: `im out, to restart use the ***/${commands[0].name}*** command`,
+  title: `im out, to restart use the \`\`\`/${commands[0].name}\`\`\` command`,
 }
 
 var error_embed = {
   color: embed_color,
-  title: 'the date-time format or price format was not correct, please relaunch using ```/launch```',
+  title: `the date-time format or price format was not correct, please relaunch using \`\`\`/${commands[0].name}\`\`\``,
 }
 
 var general_error_embed = {
   color: embed_color,
-  title: 'an error occured, please retry or check ```/howto``` for more information.',
+  title: `an error occured, please retry or check \`\`\`/${commands[2].name}\`\`\` for more information.`,
 }
 
 var set_error_embed = {
   color: embed_color,
-  title: 'please choose a channel to send the embed to, using the ````/set```` command.\nfor more info check ```/howto```',
+  title: `please choose a channel to send the embed to, using the \`\`\`/${commands[1].name}\`\`\` command.\nfor more info check \`\`\`/${commands[2].name}\`\`\``,
   footer: {
     text: 'this message will autodelete in 20 seconds'
   }
@@ -156,7 +156,7 @@ client.on('interactionCreate', async interaction => {
         var date = new Date(event_data[3])
 
         function hasOneDigit(val) {
-          return String(Math.abs(val)).charAt(0) == val;
+          return String(Math.abs(val)).charAt(0) == val
         }
 
         if (hasOneDigit(date.getDate())) {
@@ -261,7 +261,7 @@ client.on('interactionCreate', async interaction => {
 
     var embed = {
       color: embed_color,
-      title: 'this channel will now be used to send game events notifications.\nreuse ```/set``` to change in any other channel',
+      title: `this channel will now be used to send game events notifications.\nreuse \`\`\`/${commands[1].name}\`\`\` to change in any other channel`,
       footer: {
         text: 'this message will autodelete in 20 seconds'
       }

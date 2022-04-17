@@ -1,6 +1,7 @@
 {
     "commands": [
         {"name": "event", "description": "setup a game event"},
-        {"name": "set", "description": "use it on the channel you want to send the game events embeds into"}
+        {"name": "set", "description": "use it on the channel you want to send the game events embeds into"},
+        {"name": "guide", "description": "it shows information on how to setup the bot"}
     ]
 }
