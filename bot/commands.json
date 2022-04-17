@@ -1,5 +1,6 @@
 {
     "commands": [
-        {"name": "launch", "description": "initialise guild event"}
+        {"name": "event", "description": "initialise guild event"},
+        {"name": "set", "description": "use it on the channel you want to set the events into"}
     ]
 }

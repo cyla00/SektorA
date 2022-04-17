@@ -10,6 +10,7 @@ var client = new Client({ intents: [
 })
 var { commands } = require('./commands.json')
 var { admin, event_manager, player } = require('./roles.json')
+var { event_notification_channel } = require('./channels.json')
 var moment = require('moment')
 
 var rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
@@ -68,7 +69,7 @@ var datetime_embed = {
   color: embed_color,
   title: 'Set date and hour of the game',
   fields: [
-    {name: 'format', value: '```YYYY-MM-DDTHH:MM:SS``` (include the T in between)'}
+    {name: 'format', value: '```YYYY-MM-DDTHH:MM:SS``` include the T in between, the time format is 24h'}
   ],
   footer: {
     text: 'reply or type "quit" to exit'
@@ -92,7 +93,10 @@ client.on('interactionCreate', async interaction => {
 
   if (interaction.member.roles.cache.has(event_manager.id)) {
 
-    if (interaction.commandName === 'launch') {
+    // LAUNCH AN EVENT COMMAND
+    if (interaction.commandName === 'event') {
+
+      console.log(event_notification_channel.id)
 
       interaction.reply('please fill out the forms by replying to generate the event')
 
@@ -130,7 +134,27 @@ client.on('interactionCreate', async interaction => {
           interaction.channel.send({embeds: [error_embed]})
           return
         }
+        var date = new Date(event_data[3])
 
+        function hasOneDigit(val) {
+          return String(Math.abs(val)).charAt(0) == val;
+        }
+
+        if (hasOneDigit(date.getDate())) {
+          var day = `0${date.getDate()}`
+        } 
+        else {
+          var day = date.getDate()
+        }
+
+        if (date.getHours() == '0') {
+          var hours = `00:${date.getMinutes()}`
+        }
+        else {
+          var hours = `${date.getHours()}:${date.getMinutes()}`
+        }
+
+        var formatted_date = `${date.getFullYear()}/${date.getMonth() + 1}/${day} at ${hours}`
         var event_embed = {
           color: embed_color,
           title: 'event',
@@ -138,11 +162,31 @@ client.on('interactionCreate', async interaction => {
             {name: 'title', value: `${event_data[0]}`},
             {name: 'description', value: `${event_data[1]}`},
             {name: 'price', value: `${parseInt(event_data[2]) || 0} €`},
-            {name: 'date', value: `${event_data[3]}`},
+            {name: 'date', value: `${formatted_date}`},
           ]
         }
 
-        interaction.channel.send({embeds: [event_embed]})
+        interaction.channel.send({embeds: [event_embed]}).then(async event => {
+          var confirm = '✅'
+          var deny = '❌'
+          await event.react(confirm)
+          await event.react(deny)
+          await event.channel.send(`to confirm the event select ${confirm}, to destroy it, select ${deny} and restart`)
+
+          const confirm_filter = (reaction, user) => {
+            return user.id === message.author.id
+          }
+          
+          event.awaitReactions({confirm_filter, max: 1})
+            .then((collected) => {
+              if (collected.first().emoji.name == confirm) {
+                interaction.channel.send('confirm')
+              }
+              else if (collected.first().emoji.name == deny) {
+                interaction.channel.send('deny')
+              }
+            })
+        })
       })
 
     }
@@ -150,6 +194,19 @@ client.on('interactionCreate', async interaction => {
   else {
     await interaction.reply('not allowed')
     return interaction.deleteReply()
+  }
+
+
+  // SET THE CHANNEL TO SEND THE EVENT EMBED TO
+  if (interaction.commandName === 'set') {
+    event_notification_channel.id = interaction.channel.id
+
+    var embed = {
+      color: embed_color,
+      title: 'this channel will now be used to send game events notifications\nreuse ```/set``` to change in any other channel',
+    }
+    interaction.reply({embeds: [embed]})
+    console.log(event_notification_channel.id)
   }
 })
 
