@@ -78,7 +78,7 @@ var datetime_embed = {
 
 var exit_embed = {
   color: embed_color,
-  title: 'im out, to restart use the ```/launch``` command',
+  title: `im out, to restart use the ***/${commands[0].name}*** command`,
 }
 
 var error_embed = {
@@ -91,6 +91,14 @@ var general_error_embed = {
   title: 'an error occured, please retry or check ```/howto``` for more information.',
 }
 
+var set_error_embed = {
+  color: embed_color,
+  title: 'please choose a channel to send the embed to, using the ````/set```` command.\nfor more info check ```/howto```',
+  footer: {
+    text: 'this message will autodelete in 20 seconds'
+  }
+}
+
 // COMMANDS EVENTS.
 client.on('interactionCreate', async interaction => {
 
@@ -99,7 +107,17 @@ client.on('interactionCreate', async interaction => {
   if (interaction.member.roles.cache.has(event_manager.id)) {
 
     // LAUNCH AN EVENT.
-    if (interaction.commandName === 'event') {
+    if (interaction.commandName === commands[0].name) {
+      if(event_notification_channel.id == "") {
+        return interaction.reply({embeds: [set_error_embed]}).then(() => {
+          setTimeout(() => {
+            return interaction.deleteReply()
+          }, 5000)
+        }).catch(err => {
+          console.error(err)
+          return interaction.channel.send({embeds: [general_error_embed]})
+        })
+      }
 
       interaction.reply('please fill out the forms by replying to generate the event')
       
@@ -183,14 +201,8 @@ client.on('interactionCreate', async interaction => {
             .then((collected) => {
               if (collected.first().emoji.name == confirm) {
                 if (event_notification_channel.id == "") {
-                  var error_embed = {
-                    color: embed_color,
-                    title: 'please choose a channel to send the embed to, using the ```/set``` command.\nfor more info check ```/howto```',
-                    footer: {
-                      text: 'this message will autodelete in 20 seconds'
-                    }
-                  }
-                  interaction.channel.send({embeds: [error_embed]}).then(() => {
+                  
+                  interaction.channel.send({embeds: [set_error_embed]}).then(() => {
                     setTimeout(() => {
                       return interaction.channel.bulkDelete(14)
                     },20000)
@@ -244,7 +256,7 @@ client.on('interactionCreate', async interaction => {
 
 
   // SET THE CHANNEL TO SEND THE EVENT EMBED TO.
-  if (interaction.commandName === 'set') {
+  if (interaction.commandName === commands[1].name) {
     event_notification_channel.id = interaction.channel.id
 
     var embed = {
@@ -258,6 +270,9 @@ client.on('interactionCreate', async interaction => {
       setTimeout(() => {
         interaction.deleteReply()
       }, 20000)
+    }).catch(err => {
+      console.error(err)
+      return interaction.channel.send({embeds: [general_error_embed]})
     })
   }
 })
