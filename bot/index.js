@@ -1,7 +1,7 @@
 require('dotenv').config()
 var { REST } = require('@discordjs/rest')
 var { Routes } = require('discord-api-types/v9')
-var { Client, Intents } = require('discord.js')
+var { Client, Intents, MessageActionRow, MessageButton } = require('discord.js')
 var client = new Client({ intents: [
   Intents.FLAGS.GUILDS,
   Intents.FLAGS.GUILD_MESSAGES,
@@ -91,18 +91,18 @@ var general_error_embed = {
   title: 'an error occured, please retry or check ```/howto``` for more information.',
 }
 
-// COMMANDS EVENTS
+// COMMANDS EVENTS.
 client.on('interactionCreate', async interaction => {
 
   if (!interaction.isCommand()) return
 
   if (interaction.member.roles.cache.has(event_manager.id)) {
 
-    // LAUNCH AN EVENT COMMAND
+    // LAUNCH AN EVENT.
     if (interaction.commandName === 'event') {
 
       interaction.reply('please fill out the forms by replying to generate the event')
-
+      
       var event_data = []
       var questions = [title_embed, description_embed, price_embed, datetime_embed]
       var counter = 0
@@ -111,8 +111,6 @@ client.on('interactionCreate', async interaction => {
       var collector = interaction.channel.createMessageCollector({filter, max: 4})
 
       interaction.channel.send({embeds: [questions[counter++]]})
-
-
 
       collector.on('collect', m => {
 
@@ -177,7 +175,7 @@ client.on('interactionCreate', async interaction => {
           await event.react(deny)
           await event.channel.send(`to confirm the event ${confirm}, to destroy it ${deny}`)
 
-          const confirm_filter = (reaction, user) => {
+          const confirm_filter = (user) => {
             return user.id === message.author.id
           }
           
@@ -189,21 +187,39 @@ client.on('interactionCreate', async interaction => {
                     color: embed_color,
                     title: 'please choose a channel to send the embed to, using the ```/set``` command.\nfor more info check ```/howto```',
                     footer: {
-                      text: 'this message will autodestruct in 20 seconds'
+                      text: 'this message will autodelete in 20 seconds'
                     }
                   }
                   interaction.channel.send({embeds: [error_embed]}).then(() => {
                     setTimeout(() => {
                       return interaction.channel.bulkDelete(14)
-                    },3000)
+                    },20000)
                   }).catch(err => {
                     console.error(err)
                     return interaction.channel.send({embeds: [general_error_embed]})
                   })
                 }
                 else{
-                  client.channels.cache.get(event_notification_channel.id).send({embeds: [event_embed]}).then(async event => {
-                    await event.react('🃏')
+
+                  var row = new MessageActionRow()
+                    .addComponents(
+                    new MessageButton()
+                      .setCustomId('primary')
+                      .setLabel('Participate')
+                      .setStyle('SUCCESS')
+                      .setEmoji('🃏')
+                  )
+          
+                  client.channels.cache.get(event_notification_channel.id).send({embeds: [event_embed], components: [row]}).then(async event => {
+
+                    client.on('interactionCreate', interaction => {
+                      if (!interaction.isButton()) return
+
+                      // HERE THE PLAYER WILL START THE VERIFICATION PROCESS FROM EPIC GAMES AND PAYPAL
+
+                      interaction.reply('done')
+                    })
+
                   }).catch(err => {
                     console.error(err)
                     return interaction.channel.send({embeds: [general_error_embed]})
@@ -219,7 +235,6 @@ client.on('interactionCreate', async interaction => {
           return interaction.channel.send({embeds: [general_error_embed]})
         })
       })
-
     }
   }
   else {
@@ -228,15 +243,22 @@ client.on('interactionCreate', async interaction => {
   }
 
 
-  // SET THE CHANNEL TO SEND THE EVENT EMBED TO
+  // SET THE CHANNEL TO SEND THE EVENT EMBED TO.
   if (interaction.commandName === 'set') {
     event_notification_channel.id = interaction.channel.id
 
     var embed = {
       color: embed_color,
       title: 'this channel will now be used to send game events notifications.\nreuse ```/set``` to change in any other channel',
+      footer: {
+        text: 'this message will autodelete in 20 seconds'
+      }
     }
-    interaction.reply({embeds: [embed]})
+    interaction.reply({embeds: [embed]}).then(() => {
+      setTimeout(() => {
+        interaction.deleteReply()
+      }, 20000)
+    })
   }
 })
 
