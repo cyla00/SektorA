@@ -2,7 +2,7 @@ require('dotenv').config()
 var { REST } = require('@discordjs/rest')
 var { Routes } = require('discord-api-types/v9')
 var { Client, Intents, MessageActionRow, MessageButton } = require('discord.js')
-var client = new Client({ intents: [
+var bot = new Client({ intents: [
   Intents.FLAGS.GUILDS,
   Intents.FLAGS.GUILD_MESSAGES,
   Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
@@ -13,6 +13,7 @@ var { commands } = require('./commands.json')
 var { admin, event_manager, player } = require('./roles.json')
 var { event_notification_channel } = require('./channels.json')
 var moment = require('moment')
+const { Pool } = require('pg')
 
 var rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
 
@@ -31,9 +32,19 @@ var rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
   }
 })()
 
-client.on('ready', () => {
+bot.on('ready', () => {
+  const database = new Pool()
 
-  console.log(`${client.user.tag} has a fancy hat $:)`)
+  try {
+    database.connect()
+    console.log('db connected')
+    database.end()
+  }
+  catch (err) {
+    console.error(err)
+  }
+  
+  console.log(`${bot.user.tag} has a fancy hat $:)`)
 })
 
 // EMBEDS
@@ -101,7 +112,7 @@ var set_error_embed = {
 }
 
 // COMMANDS EVENTS.
-client.on('interactionCreate', async interaction => {
+bot.on('interactionCreate', async interaction => {
 
   if (!interaction.isCommand()) return
 
@@ -223,9 +234,9 @@ client.on('interactionCreate', async interaction => {
                       .setEmoji('🃏')
                   )
           
-                  client.channels.cache.get(event_notification_channel.id).send({embeds: [event_embed], components: [row]}).then(async event => {
+                  bot.channels.cache.get(event_notification_channel.id).send({embeds: [event_embed], components: [row]}).then(async event => {
 
-                    client.on('interactionCreate', interaction => {
+                    bot.on('interactionCreate', interaction => {
                       if (!interaction.isButton()) return
                         console.log(interaction.user)
                         interaction.reply('reacted')
@@ -276,13 +287,13 @@ client.on('interactionCreate', async interaction => {
   }
 })
 
-client.on('guildCreate', async (res) => {
+bot.on('guildCreate', async (res) => {
   await res.members.fetch().then(members => {
       members.forEach(member => {
-        if (member.user.id == client.user.id) return
+        if (member.user.id == bot.user.id) return
           console.log(member.user)
       })
   })
 })
 
-client.login(process.env.TOKEN) 
+bot.login(process.env.TOKEN) 
