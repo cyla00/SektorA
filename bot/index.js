@@ -13,7 +13,7 @@ var { commands } = require('./commands.json')
 var { admin, event_manager, player } = require('./roles.json')
 var { event_notification_channel } = require('./channels.json')
 var moment = require('moment')
-const { Pool } = require('pg')
+var { buildDB, add_bulk_users } = require('./connection')
 
 var rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
 
@@ -33,17 +33,7 @@ var rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
 })()
 
 bot.on('ready', () => {
-  const database = new Pool()
-
-  try {
-    database.connect()
-    console.log('db connected')
-    database.end()
-  }
-  catch (err) {
-    console.error(err)
-  }
-  
+  buildDB()
   console.log(`${bot.user.tag} has a fancy hat $:)`)
 })
 
@@ -289,11 +279,16 @@ bot.on('interactionCreate', async interaction => {
 
 bot.on('guildCreate', async (res) => {
   await res.members.fetch().then(members => {
-      members.forEach(member => {
+
+      members.forEach(async member => {
         if (member.user.id == bot.user.id) return
-          console.log(member.user)
+        await add_bulk_users(member.user.id, member.user.username, member.user.discriminator)
       })
+  }).catch(err => {
+    console.error(err)
   })
 })
 
 bot.login(process.env.TOKEN) 
+
+
