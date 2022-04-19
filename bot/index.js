@@ -6,7 +6,8 @@ var client = new Client({ intents: [
   Intents.FLAGS.GUILDS,
   Intents.FLAGS.GUILD_MESSAGES,
   Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-] 
+  Intents.FLAGS.GUILD_MEMBERS,
+  ]
 })
 var { commands } = require('./commands.json')
 var { admin, event_manager, player } = require('./roles.json')
@@ -112,7 +113,7 @@ client.on('interactionCreate', async interaction => {
         return interaction.reply({embeds: [set_error_embed]}).then(() => {
           setTimeout(() => {
             return interaction.deleteReply()
-          }, 5000)
+          }, 20000)
         }).catch(err => {
           console.error(err)
           return interaction.channel.send({embeds: [general_error_embed]})
@@ -226,10 +227,8 @@ client.on('interactionCreate', async interaction => {
 
                     client.on('interactionCreate', interaction => {
                       if (!interaction.isButton()) return
-
-                      // HERE THE PLAYER WILL START THE VERIFICATION PROCESS FROM EPIC GAMES AND PAYPAL
-
-                      interaction.reply('done')
+                        console.log(interaction.user)
+                        interaction.reply('reacted')
                     })
 
                   }).catch(err => {
@@ -255,7 +254,7 @@ client.on('interactionCreate', async interaction => {
   }
 
 
-  // SET THE CHANNEL TO SEND THE EVENT EMBED TO.
+ // SET THE CHANNEL TO SEND THE EVENT EMBED TO.
   if (interaction.commandName === commands[1].name) {
     event_notification_channel.id = interaction.channel.id
 
@@ -277,4 +276,13 @@ client.on('interactionCreate', async interaction => {
   }
 })
 
-client.login(process.env.TOKEN)
+client.on('guildCreate', async (res) => {
+  await res.members.fetch().then(members => {
+      members.forEach(member => {
+        if (member.user.id == client.user.id) return
+          console.log(member.user)
+      })
+  })
+})
+
+client.login(process.env.TOKEN) 
