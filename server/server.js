@@ -6,12 +6,13 @@ var url = require('url')
 var session = require('express-session')
 var { v4: uuidv4 } = require('uuid')
 var cors = require('cors')
+var path = require('path')
 
 var app = express()
 app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(express.static(`${__dirname}/public`))
+app.use(express.static('public'))
 
 var sess = {
     secret: uuidv4().toString(),
@@ -67,14 +68,13 @@ app.get('/api/auth/discord', async (req, res) => {
                     req.session.DS_email = discord_user.email
                     req.session.DS_verified = discord_user.verified
                     req.session.DS_image = `https://cdn.discordapp.com/avatars/${discord_user.id}/${discord_user.avatar}.png`
-                    res.send(req.session)
                     console.log(req.session)
                     console.log(user.data)
                     console.log(event.data)
                 })
             }).catch(err => console.error(err))
 
-            
+            res.sendFile(path.join(__dirname, './public', 'index.html'))
         }
         catch(err){
             console.error(err)
