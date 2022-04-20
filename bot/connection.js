@@ -76,4 +76,25 @@ function add_bulk_users(id, username, discriminator){
     }
 }
 
-module.exports = { buildDB, add_bulk_users }
+function delete_user(id){
+    try{
+        var database = new Client()
+
+        database.connect(async (err, db) => {
+            if(err) throw err
+
+            var query = `DELETE FROM users WHERE id=$1`
+            var values = [id]
+
+            await db.query(query, values, (err, res) => {
+                if(err) throw err
+                return database.end()
+            })
+        })
+    }
+    catch(err){
+        console.error(err)
+    }
+}
+
+module.exports = { buildDB, add_bulk_users, delete_user }

@@ -7,13 +7,14 @@ var bot = new Client({ intents: [
   Intents.FLAGS.GUILD_MESSAGES,
   Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
   Intents.FLAGS.GUILD_MEMBERS,
+  Intents.FLAGS.GUILD_PRESENCES,
   ]
 })
 var { commands } = require('./commands.json')
 var { admin, event_manager, player } = require('./roles.json')
 var { event_notification_channel } = require('./channels.json')
 var moment = require('moment')
-var { buildDB, add_bulk_users } = require('./connection')
+var { buildDB, add_bulk_users, delete_user } = require('./connection')
 
 var rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
 
@@ -289,6 +290,24 @@ bot.on('guildCreate', async (res) => {
   })
 })
 
-bot.login(process.env.TOKEN) 
+bot.on('guildMemberAdd', (res) => {
+  try {
+    add_bulk_users(res.user.id, res.user.username, res.user.discriminator)
+  }
+  catch (err) {
+    console.error(err)
+  }
+})
+
+bot.on('guildMemberRemove', (res) => {
+  try {
+    delete_user(res.user.id)
+  }
+  catch (err) {
+    console.error(err)
+  }
+})
+
+bot.login(process.env.TOKEN)
 
 
