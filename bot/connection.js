@@ -8,7 +8,7 @@ function buildDB () {
             if (err) throw err
             console.log('database connected')
             await db.query(`CREATE TABLE IF NOT EXISTS users (
-                id VARCHAR(100) NOT NULL,
+                id VARCHAR(100) UNIQUE NOT NULL,
                 username VARCHAR(100) NOT NULL,
                 discriminator VARCHAR(6) NOT NULL,
                 created_on TIMESTAMP NOT NULL,
@@ -20,7 +20,7 @@ function buildDB () {
             })
 
             await db.query(`CREATE TABLE IF NOT EXISTS admins (
-                id VARCHAR(100) NOT NULL,
+                id VARCHAR(100) UNIQUE NOT NULL,
                 username VARCHAR(100) NOT NULL,
                 discriminator VARCHAR(6) NOT NULL,
                 created_on TIMESTAMP NOT NULL,
@@ -44,6 +44,7 @@ function add_bulk_users(id, username, discriminator){
         var database = new Client()
 
         database.connect(async (err, db) => {
+            if (err) throw err
             var query_prep = `INSERT INTO users (
               id, 
               username, 
@@ -51,7 +52,7 @@ function add_bulk_users(id, username, discriminator){
               created_on, 
               last_login, 
               isAdmin
-              ) VALUES ($1, $2, $3, $4, $5, $6);`
+              ) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (id) DO NOTHING;`
 
             var time = new Date().toISOString().slice(0, 19).replace('T', ' ');
   
@@ -66,7 +67,6 @@ function add_bulk_users(id, username, discriminator){
   
             await db.query(query_prep, values,(err, res) => {
               if (err) throw err
-              console.log(`${username} has been added to database`)
               return database.end()
             })
         })
