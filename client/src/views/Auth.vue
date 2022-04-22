@@ -1,7 +1,10 @@
 <script>
 export default{
     name: 'Auth',
-    props: ['code']
+    props: ['code'],
+    mounted(){
+        localStorage.setItem('code', this.code)
+    }
 }
 
 </script>
@@ -9,7 +12,7 @@ export default{
 
 
 <template>
-    <h1>{{this.code}}</h1>
+    <h1>authorizing ...</h1>
 </template>
 
 
