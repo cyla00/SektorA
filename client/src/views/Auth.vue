@@ -4,7 +4,7 @@ export default{
     props: ['code'],
     mounted(){
         localStorage.setItem('code', this.code)
-        this.$router.push({path: '/dash'})
+        return window.location.href = '/dash'
     },
 }
 </script>
