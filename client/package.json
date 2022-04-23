@@ -7,6 +7,8 @@
     "preview": "vite preview --port 5050"
   },
   "dependencies": {
+    "aes-encryption": "^1.0.4",
+    "axios": "^0.26.1",
     "vue": "^3.2.33",
     "vue-router": "^4.0.14"
   },

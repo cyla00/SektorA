@@ -1,5 +1,7 @@
 <script>
+import AesEncryption from 'aes-encryption'
 
+var AES = new AesEncryption()
 
 </script>
 

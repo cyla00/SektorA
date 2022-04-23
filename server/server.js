@@ -6,7 +6,8 @@ var url = require('url')
 var session = require('express-session')
 var { v4: uuidv4 } = require('uuid')
 var cors = require('cors')
-var path = require('path')
+var { Client } = require('pg')
+var AesEncryption = require('aes-encryption')
 
 var app = express()
 app.use(cors())
@@ -30,9 +31,9 @@ if(process.env.WEB_STATUS == 'production'){
 
 app.use(session(sess))
 
-app.get('/api/auth/discord', async (req, res) => {
+app.post('/api/auth', async (req, res) => {
 
-    var { code } = req.query
+    var code = req.headers.authorization
 
     if(code){
         try{
@@ -42,7 +43,7 @@ app.get('/api/auth/discord', async (req, res) => {
                 'client_secret': process.env.CLIENT_SECRET,
                 'grant_type': 'authorization_code',
                 'code': code.toString(),
-                'redirect_uri': `${process.env.WEB_URL}/api/auth/discord`
+                'redirect_uri': `http://localhost:3000/auth`
             })
 
             await axios.post('https://discord.com/api/v8/oauth2/token', data.toString(), {
@@ -50,39 +51,64 @@ app.get('/api/auth/discord', async (req, res) => {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             }).then(async event => {
-                if(event.status !== 200) res.sendStatus(404)
-
-                req.session.access_token = event.data.access_token
+                var access_token = event.data.access_token
 
                 await axios.get('https://discord.com/api/v8/users/@me', {
                     headers: {
-                        'Authorization': `Bearer ${event.data.access_token}`,
+                        'Authorization': `Bearer ${access_token}`,
                     }
                 }).then(user => {
-                    if(user.status !== 200) res.sendStatus(404)
 
-                    var discord_user = user.data
-                    
-                    req.session.DS_id = discord_user.id
-                    req.session.DS_username = `${discord_user.username}#${discord_user.discriminator}`
-                    req.session.DS_email = discord_user.email
-                    req.session.DS_verified = discord_user.verified
-                    req.session.DS_image = `https://cdn.discordapp.com/avatars/${discord_user.id}/${discord_user.avatar}.png`
-                    console.log(req.session)
-                    console.log(user.data)
-                    console.log(event.data)
-                })
+                    var database = new Client()
+
+                    try{
+                        database.connect(async (err, db) => {
+                            if (err) throw err
+                            var query = 'select exists(select 1 from users where id=$1)'
+                            await db.query(query, [user.id],(err, data) => {
+                                if (err) throw err
+
+                                if(data){
+
+                                    var AES = new AesEncryption()
+
+                                    AES.setSecretKey(process.env.KEY)
+
+                                    console.log(user)
+                                    res.status(200).send({
+                                        id: AES.encrypt(user.data.id),
+                                        username: AES.encrypt(user.data.username),
+                                        discriminator: AES.encrypt(user.data.discriminator),
+                                        avatar: AES.encrypt(user.data.avatar),
+                                        email: AES.encrypt(user.data.email),
+                                        country: AES.encrypt(user.data.locale),
+                                        access_token: AES.encrypt(access_token),
+                                        key: process.env.KEY
+                                    })
+                                }
+                                else{
+                                    res.sendStatus(403)
+                                }
+                                return database.end()
+                            })
+                        })
+                    }
+                    catch(err){
+                        console.error(err)
+                    }
+                }).catch(err => console.error(err))
             }).catch(err => console.error(err))
-
-            res.sendFile(path.join(__dirname, './public', 'index.html'))
         }
         catch(err){
             console.error(err)
-            res.sendStatus(400)
+            res.sendStatus(403)
         }
+    }
+    else{
+        res.sendStatus(403)
     }
 })
 
-app.listen(process.env.WEB_PORT, back => {
+app.listen(process.env.WEB_PORT, () => {
     console.log(process.env.WEB_URL)
 })
