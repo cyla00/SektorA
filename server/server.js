@@ -69,21 +69,15 @@ app.post('/api/auth', async (req, res) => {
                                 if (err) throw err
 
                                 if(data){
-
-                                    var AES = new AesEncryption()
-
-                                    AES.setSecretKey(process.env.KEY)
-
                                     console.log(user)
                                     res.status(200).send({
-                                        id: AES.encrypt(user.data.id),
-                                        username: AES.encrypt(user.data.username),
-                                        discriminator: AES.encrypt(user.data.discriminator),
-                                        avatar: AES.encrypt(user.data.avatar),
-                                        email: AES.encrypt(user.data.email),
-                                        country: AES.encrypt(user.data.locale),
-                                        access_token: AES.encrypt(access_token),
-                                        key: process.env.KEY
+                                        id: user.data.id,
+                                        username: user.data.username,
+                                        discriminator: user.data.discriminator,
+                                        avatar: user.data.avatar,
+                                        email: user.data.email,
+                                        country: user.data.locale,
+                                        access_token: access_token,
                                     })
                                 }
                                 else{

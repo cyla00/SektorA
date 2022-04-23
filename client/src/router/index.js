@@ -22,12 +22,11 @@ const router = createRouter({
       name: 'Auth',
       component: Auth,
       props: route => ({'code': route.query.code}),
-      beforeEnter: (to, from, next) => {
+      beforeEnter: async (to, from, next) => {
         var id = localStorage.getItem('id')
-        var code = localStorage.getItem('code')
-        if(id || !code) return next('/')
+        if(id) return next('/')
         next()
-      }
+      },
     },
     {
       path: '/dash',

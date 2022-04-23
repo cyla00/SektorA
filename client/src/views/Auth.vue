@@ -5,9 +5,7 @@ export default{
     name: 'Auth',
     props: ['code'],
     mounted(){
-
         localStorage.setItem('code', this.code)
-
         var config = {
             headers: {
                 Authorization: localStorage.getItem('code')
@@ -17,6 +15,7 @@ export default{
         async function code_auth(){
             try{
                 await axios.post('http://localhost:5000/api/auth', {}, config,).then(res => {
+                    
                     if(res.status !== 200) {
                         window.location.href = '/error'
                     }
@@ -29,6 +28,7 @@ export default{
                         localStorage.setItem('email', res.data.email)
                         localStorage.setItem('avatar', res.data.avatar)
                         localStorage.setItem('country', res.data.country)
+                        localStorage.setItem('clown', res.data.clown)
                         window.location.href = '/dash'
                     }
                     

@@ -1,15 +1,18 @@
 <script>
-import AesEncryption from 'aes-encryption'
-
-var AES = new AesEncryption()
-
+import Profile from '../components/Profile.vue'
+export default{
+    name: 'Dash',
+    components: {
+        Profile: Profile,
+    },
+}
 </script>
 
 
 
 <template>
 
-    <h1>dash</h1>
+    <Profile/>
 
 </template>
 
