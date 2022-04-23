@@ -3,11 +3,8 @@ var express = require('express')
 var bodyParser = require('body-parser')
 var axios = require('axios')
 var url = require('url')
-var session = require('express-session')
-var { v4: uuidv4 } = require('uuid')
 var cors = require('cors')
 var { Client } = require('pg')
-var AesEncryption = require('aes-encryption')
 
 var app = express()
 app.use(cors())
@@ -15,21 +12,9 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static('public'))
 
-var sess = {
-    secret: uuidv4().toString(),
-    saveUninitialized: false,
-    resave: false,
-    cookie: {
-        maxAge: 3600000,
-        secure: false,
-    },
-}
-
 if(process.env.WEB_STATUS == 'production'){
     sess.cookie.secure = true
 }
-
-app.use(session(sess))
 
 app.post('/api/auth', async (req, res) => {
 
@@ -69,7 +54,6 @@ app.post('/api/auth', async (req, res) => {
                                 if (err) throw err
 
                                 if(data){
-                                    console.log(user)
                                     res.status(200).send({
                                         id: user.data.id,
                                         username: user.data.username,

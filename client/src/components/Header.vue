@@ -6,6 +6,7 @@
             return{
                 code_check: '',
                 id_check: '',
+                auth_url: 'https://discord.com/api/oauth2/authorize?client_id=962299605041709076&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&response_type=code&scope=identify%20email%20guilds',
             }
         },
         mounted(){
@@ -26,7 +27,6 @@
         methods: {
             logout: () => {
                 if(confirm('are you sure you want to logout?')){
-                    // localStorage.removeItem('code')
                     localStorage.clear()
                     return window.location.href = '/'
                 }
@@ -43,9 +43,9 @@
 <template>
 
     <RouterLink to="/">Home</RouterLink>
-    <a v-if="!this.id_check" href="https://discord.com/api/oauth2/authorize?client_id=962299605041709076&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&response_type=code&scope=identify%20email%20guilds">Login with discord</a>
-    <button v-if="this.id_check == true" v-on:click="logout()">Logout</button>
+    <a v-if="!this.id_check" :href="this.auth_url">Login with discord</a>
     <RouterLink v-if="this.id_check == true" to="/dash">Dashboard</RouterLink>
+    <button v-if="this.id_check == true" v-on:click="logout()">Logout</button>
 
     <RouterView />
 

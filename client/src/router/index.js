@@ -24,7 +24,7 @@ const router = createRouter({
       props: route => ({'code': route.query.code}),
       beforeEnter: async (to, from, next) => {
         var id = localStorage.getItem('id')
-        if(id) return next('/')
+        if(id) return next('/dash')
         next()
       },
     },

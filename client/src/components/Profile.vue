@@ -7,12 +7,12 @@ export default{
             id: localStorage.getItem('id'),
             username: `${localStorage.getItem('username')}#${localStorage.getItem('discriminator')}`,
             email: localStorage.getItem('email'),
-            avatar: `https://cdn.discordapp.com/avatars/${localStorage.getItem('id').toString()}/${localStorage.getItem('avatar').toString()}.png`,
+            avatar: `https://cdn.discordapp.com/avatars/${localStorage.getItem('id')}/${localStorage.getItem('avatar')}.png`,
             country: localStorage.getItem('country').toUpperCase()
         }
     },
     mounted(){
-        
+        console.log(this.avatar);
     }
 }
 
@@ -23,10 +23,9 @@ export default{
 <template>
     <h1>profile</h1>
     <div>
-        <img id="avatar" src="https://cdn.discordapp.com/avatars/853180555947409419/9bb6a19b5d0e4b615e8df1662900faef.png" alt="">
+        <img id="avatar" :src="this.avatar">
         <h3>{{this.username}}</h3>
         <h3>{{this.country}}</h3>
-        <p>{{this.avatar}}</p>
     </div>
 
 </template>
@@ -34,4 +33,5 @@ export default{
 
 
 <style scoped>
+
 </style>

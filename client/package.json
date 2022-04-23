@@ -10,6 +10,7 @@
     "aes-encryption": "^1.0.4",
     "axios": "^0.26.1",
     "buffer": "^6.0.3",
+    "dotenv": "^16.0.0",
     "vue": "^3.2.33",
     "vue-router": "^4.0.14"
   },
