@@ -87,6 +87,13 @@ app.post('/api/auth', async (req, res) => {
     }
 })
 
+if(process.env.NODE_ENV === 'production'){
+    app.use(express.static(__dirname + '/public'))
+    app.get(/.*/, (req, res) => {
+        res.sendFile(__dirname + '/public/index.html')
+    })
+}
+
 app.listen(process.env.WEB_PORT, () => {
     console.log(process.env.WEB_URL)
 })
