@@ -78,6 +78,11 @@ bot.on('interactionCreate', async interaction => {
         }, 20000)
       })
     }
+
+    // CHANNELS SETUP
+    if(interaction.commandName == commands[2].name){
+      return
+    }
   }
   else {
     await interaction.reply('not allowed').then(() => {

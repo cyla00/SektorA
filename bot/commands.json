@@ -1,6 +1,7 @@
 {
     "commands": [
         {"name": "guide", "description": "it shows information on how to setup the bot"},
-        {"name": "update", "description": "updates guild users to database"}
+        {"name": "update", "description": "updates guild users to database"},
+        {"name": "setup", "description": "will create all the required channels"}
     ]
 }
